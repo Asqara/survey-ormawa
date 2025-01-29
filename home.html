@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .question {
+            display: none;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.5s ease;
+        }
+
+        .question.active {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e9ecef;
+        }
+
+        .navigation {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .prev-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .next-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: #eee;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .progress {
+            height: 100%;
+            background: #667eea;
+            width: 0;
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}
+
+.start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .start-screen input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .start-screen button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    /* Styling untuk form */
+.start-screen {
+    text-align: center;
+    margin: 20px;
+}
+
+/* Styling untuk input fields */
+.input {
+    width: 80%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Gaya border saat input divalidasi */
+.input:focus {
+    border-color: #007BFF; /* warna biru ketika fokus */
+    outline: none;
+}
+
+/* Gaya dropdown select */
+select.input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #f8f8f8;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Gaya dropdown saat fokus */
+select.input:focus {
+    border-color: #007BFF;
+    outline: none;
+    background-color: #fff;
+}
+
+/* Gaya tombol */
+button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Efek hover pada tombol */
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Animasi shake untuk form */
+
+/* Styling border merah jika input kosong */
+.input[style*="border-color: red;"] {
+    border-color: red;
+}
+
+/* Untuk mobile */
+@media screen and (max-width: 768px) {
+    .input {
+        width: 100%;
+    }
+    select.input {
+        width: 100%;
+    }
+}
+
+
+        /* Styling untuk quiz container */
+        .quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
+            margin: 20px auto;
+            display: none; /* Awalnya sembunyi */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="start-screen">
+        <h2>Masukkan Data Anda</h2>
+        <input class="input" type="text" id="nama" placeholder="Nama" required>
+        
+        <select class="input" id="kelas" required>
+            <option value="">Pilih Kelas</option>
+            <!-- Kelas ST -->
+            <option value="ST01">ST01</option>
+            <option value="ST02">ST02</option>
+            <option value="ST03">ST03</option>
+            <option value="ST04">ST04</option>
+            <option value="ST05">ST05</option>
+            <option value="ST06">ST06</option>
+            <option value="ST07">ST07</option>
+            <option value="ST08">ST08</option>
+            <option value="ST09">ST09</option>
+            <option value="ST10">ST10</option>
+            <option value="ST11">ST11</option>
+            <option value="ST12">ST12</option>
+            <option value="ST13">ST13</option>
+            <option value="ST14">ST14</option>
+            <option value="ST15">ST15</option>
+            <option value="ST16">ST16</option>
+            <option value="ST17">ST17</option>
+            <option value="ST18">ST18</option>
+            <option value="ST19">ST19</option>
+            <option value="ST20">ST20</option>
+            <option value="ST21">ST21</option>
+            <option value="ST22">ST22</option>
+            <option value="ST23">ST23</option>
+            <option value="ST24">ST24</option>
+            <option value="ST25">ST25</option>
+            <option value="ST26">ST26</option>
+            <option value="ST27">ST27</option>
+            <option value="ST28">ST28</option>
+            <option value="ST29">ST29</option>
+            <option value="ST30">ST30</option>
+            <option value="ST31">ST31</option>
+            <option value="ST32">ST32</option>
+            <option value="ST33">ST33</option>
+            <option value="ST34">ST34</option>
+            <option value="ST35">ST35</option>
+            <option value="ST36">ST36</option>
+            
+            <!-- Kelas SS -->
+            <option value="SS01">SS01</option>
+            <option value="SS02">SS02</option>
+            <option value="SS03">SS03</option>
+            <option value="SS04">SS04</option>
+            <option value="SS05">SS05</option>
+            <option value="SS06">SS06</option>
+            <option value="SS07">SS07</option>
+            <option value="SS08">SS08</option>
+            <option value="SS09">SS09</option>
+            <option value="SS10">SS10</option>
+            <option value="SS11">SS11</option>
+            <option value="SS12">SS12</option>
+            
+            <!-- Kelas INST -->
+            <option value="INST01">INST01</option>
+            <option value="INST02">INST02</option>
+            <option value="INST03">INST03</option>
+            
+            <!-- Kelas INSS -->
+            <option value="INSS01">INSS01</option>
+        </select>
+        
+        <input class="input" type="email" id="email" placeholder="Email" required>
+        <button onclick="mulaiKuis()">Mulai Kuis</button>
+    </div>
+    
+    <div class="quiz-container">
+        
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+
+        <div class="question active" data-question="1">
+            <h2>Apa ibukota Indonesia?</h2>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">Jakarta</div>
+                <div class="option" onclick="selectOption(this)">Bandung</div>
+                <div class="option" onclick="selectOption(this)">Surabaya</div>
+                <div class="option" onclick="selectOption(this)">Medan</div>
+            </div>
+        </div>
+
+        <div class="question" data-question="2">
+            <h2>Planet terdekat dari matahari adalah?</h2>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">Venus</div>
+                <div class="option" onclick="selectOption(this)">Mars</div>
+                <div class="option" onclick="selectOption(this)">Merkurius</div>
+                <div class="option" onclick="selectOption(this)">Bumi</div>
+            </div>
+        </div>
+
+        <div class="question" data-question="3">
+            <h2>2 + 2 × 2 = ?</h2>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">6</div>
+                <div class="option" onclick="selectOption(this)">8</div>
+                <div class="option" onclick="selectOption(this)">4</div>
+                <div class="option" onclick="selectOption(this)">2</div>
+            </div>
+        </div>
+        <div class="question" data-question="4">
+            <h2>Siapa penemu lampu pijar?</h2>
+            <div class="options">
+                <div class="option" onclick="selectOption(this)">Nikola Tesla</div>
+                <div class="option" onclick="selectOption(this)">Thomas Edison</div>
+                <div class="option" onclick="selectOption(this)">Isaac Newton</div>
+                <div class="option" onclick="selectOption(this)">Albert Einstein</div>
+            </div>
+        </div>
+        
+
+        <div class="navigation">
+            <button class="prev-btn" onclick="prevQuestion()">Sebelumnya</button>
+            <button class="next-btn" onclick="nextQuestion()">Selanjutnya</button>
+        </div>
+
+        <div class="result">
+            <h2>Terima Kasih Anda Sudah Menyelesaikan Survey Ini</h2>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = document.querySelectorAll('.question').length;
+
+        const userAnswers = {};
+        function mulaiKuis() {
+    const nama = document.getElementById('nama').value.trim();
+    const kelas = document.getElementById('kelas').value.trim();
+    const email = document.getElementById('email').value.trim();
+    
+    // Ambil semua input dengan class "input"
+    const inputs = document.querySelectorAll('.input');
+    
+    // Validasi input
+    if (nama === '' || kelas === '' || email === '') {
+        // Efek shake pada form
+        document.querySelector('.start-screen').classList.add('shake');
+        
+        // Memberikan border merah pada input yang kosong
+        inputs.forEach(input => {
+            if (input.value.trim() === '') {
+                input.style.borderColor = 'red';
+            } else {
+                input.style.borderColor = ''; // reset border jika input terisi
+            }
+        });
+
+        // Hapus efek shake setelah animasi selesai
+        setTimeout(() => {
+            document.querySelector('.start-screen').classList.remove('shake');
+        }, 500);
+
+        return; // Menghentikan eksekusi lebih lanjut
+    }
+
+    // Jika semua input valid, sembunyikan form dan tampilkan kuis
+    document.querySelector('.start-screen').style.display = 'none';
+    document.querySelector('.quiz-container').style.display = 'block';
+}
+
+
+        function selectOption(option) {
+    const question = option.closest('.question');
+
+    // Reset warna semua opsi ke default (tidak berwarna atau abu-abu)
+    question.querySelectorAll('.option').forEach(opt => {
+        opt.style.borderColor = "transparent"; // Hapus warna merah atau biru sebelumnya
+        opt.classList.remove('selected');
+    });
+
+    // Tambahkan efek border biru hanya ke opsi yang dipilih
+    option.classList.add('selected');
+    option.style.borderColor = "#667eea"; // Warna biru untuk jawaban yang dipilih
+
+    // Simpan jawaban user
+    userAnswers[currentQuestion] = option.textContent;
+}
+
+
+        function updateProgress() {
+            const progress = (currentQuestion / totalQuestions) * 100;
+            document.querySelector('.progress').style.width = `${progress}%`;
+        }
+
+        function showQuestion(n) {
+            document.querySelectorAll('.question').forEach(q => {
+                q.classList.remove('active');
+            });
+            const question = document.querySelector(`[data-question="${n}"]`);
+            question.classList.add('active');
+            updateProgress();
+        }
+
+        function nextQuestion() {
+    const currentQ = document.querySelector(`[data-question="${currentQuestion}"]`);
+    const selectedOption = currentQ.querySelector('.option.selected');
+
+    if (!selectedOption) {
+        // Tambahkan efek merah dan animasi getar
+        currentQ.classList.add('shake');
+        currentQ.querySelectorAll('.option').forEach(opt => opt.style.borderColor = "red");
+
+        // Hapus efek shake setelah animasi selesai
+        setTimeout(() => currentQ.classList.remove('shake'), 500);
+        return;
+    }
+
+    if (currentQuestion < totalQuestions) {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+        toggleButtons();
+    } 
+}
+
+
+        function prevQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+                toggleButtons();
+            }
+        }
+        function toggleButtons() {
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    
+    // Menyembunyikan tombol 'Previous' jika berada di pertanyaan pertama
+    prevBtn.style.display = currentQuestion === 1 ? 'none' : 'block';
+    
+    // Menyusun teks tombol 'Next' atau 'Submit'
+    if (currentQuestion === totalQuestions) {
+        nextBtn.textContent = 'Submit';
+        nextBtn.onclick = function() {
+            submitData();  // Menyimpan data
+            showResult();  // Menampilkan hasil
+        };
+    } else {
+        nextBtn.textContent = 'Selanjutnya';
+        nextBtn.onclick = nextQuestion;  // Fungsi untuk lanjut ke pertanyaan berikutnya
+    }
+}
+
+
+
+        function showResult() {
+            let score = 0;
+
+            document.querySelector('.question.active').classList.remove('active');
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.result').classList.add('show');
+            
+        }
+
+        function resetQuiz() {
+            currentQuestion = 1;
+            userAnswers = {};
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelector('.result').classList.remove('show');
+            document.querySelector('.navigation').style.display = 'flex';
+            showQuestion(1);
+            toggleButtons();
+            updateProgress();
+        }
+        function submitData() {
+    // Ambil data form
+    const nama = document.getElementById('nama').value.trim();
+    const kelas = document.getElementById('kelas').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    // Ambil jawaban kuis
+    const answers = [];
+    const questions = document.querySelectorAll('.question');
+    
+    // Ambil jawaban per pertanyaan
+    questions.forEach((question, index) => {
+        const selectedOption = question.querySelector('.option.selected');
+        if (selectedOption) {
+            answers.push(selectedOption.textContent);
+        } else {
+            answers.push(null); // jika belum dijawab
+        }
+    });
+
+    // Log data ke konsol
+    console.log({
+        nama,
+        kelas,
+        email,
+        answers
+    });
+
+    // Mendapatkan IP dan mengirimkan data ke server
+    getIpAddress().then(ipAddress => {
+        submitFormData(nama, kelas, email, answers, ipAddress);  // Kirim kelas juga
+    });
+}
+
+function getIpAddress() {
+    return fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => data.ip);
+}
+
+function submitFormData(name, kelas, email, answers, ipAddress) {
+    const url = 'https://script.google.com/macros/s/AKfycbzHCgozpQjWyyXPYARrWjl4TjNCieFfrcqgqoR4Y1JBv3nyLhgAj4JlRFNf2QbrlIes/exec'; // Ganti dengan URL Web App Google Apps Script
+
+    // Kirim data ke server
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'name': name,
+            'kelas': kelas,
+            'email': email,
+            'answers': JSON.stringify(answers), // Kirim sebagai JSON string
+            'ip': ipAddress
+        })
+    }).catch(error => {
+        console.error('Error:', error);
+        messageDiv.textContent = 'Terjadi kesalahan. Coba lagi nanti.';
+    });
+}
+
+
+
+        // Initialize
+        toggleButtons();
+        updateProgress();
+    </script>
+</body>
+</html>
